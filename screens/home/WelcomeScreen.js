@@ -8,20 +8,77 @@ import {
   TouchableOpacity,
   View,
   PermissionsAndroid,
+  Platform,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 // import MapView from "react-native-maps";
 import Header from "../../components/Header/Header";
 import { useSelector } from "react-redux";
 import MapView, { Marker } from "react-native-maps";
-import * as Location from 'expo-location'; // Import expo-location
+import * as Location from "expo-location"; // Import expo-location
 
 export default function WelcomeScreen({ navigation }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [currentLocation, setCurrentLocation] = useState(null);
-
+  const [marker, setMarker] = useState(null);
   const auth = useSelector((state) => state.auth);
   const username = auth?.user?.displayName;
+
+  const provideText = (title) => {
+    switch (title) {
+      case "Light Rain or No Rain":
+        return "It's been light rain or no rain in this area.";
+      case "Moderate Rain":
+        return "It's been moderate rain in this area";
+      case "Heavy Rain":
+        return "It's been heaving raining in this area";
+      default:
+        return "It's been raining in this area";
+    }
+  };
+  const MarkerData = [
+    {
+      position: {
+        latitude: 24.871941,
+        longitude: 66.98806,
+      },
+      intensity: "Light Rain or No Rain",
+      intensityNumber: 949,
+    },
+    {
+      position: {
+        latitude: 24.931301,
+        longitude: 67.037323,
+      },
+      intensity: "Light Rain or No Rain",
+      intensityNumber: 951,
+    },
+    {
+      position: {
+        latitude: 24.93659,
+        longitude: 67.087533,
+      },
+      intensity: "Moderate Rain",
+      intensityNumber: 478,
+    },
+    {
+      position: {
+        latitude: 24.959242,
+        longitude: 67.074221,
+      },
+      intensity: "Heavy Rain!",
+      intensityNumber: 237,
+    },
+    {
+      position: {
+        latitude: 25.006272,
+        longitude: 67.064479,
+      },
+      intensity: "Moderate Rain",
+      intensityNumber: 264,
+    },
+    // Add more markers as needed
+  ];
   let drawerRef = null;
 
   // const openDrawer = () => {
@@ -40,20 +97,20 @@ export default function WelcomeScreen({ navigation }) {
 
   useEffect(() => {
     getLocationAsync();
-    }, []);
+  }, []);
 
   const getLocationAsync = async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Location permission denied');
+      if (status !== "granted") {
+        console.log("Location permission denied");
         return;
       }
 
       let location = await Location.getCurrentPositionAsync({});
       setCurrentLocation(location);
     } catch (error) {
-      console.error('Error getting location: ', error);
+      console.error("Error getting location: ", error);
     }
   };
   return (
@@ -70,6 +127,14 @@ export default function WelcomeScreen({ navigation }) {
         {/* Google Map View (Replace with actual GoogleMapView component) */}
         {currentLocation ? (
           <MapView
+            legalLabelInsets={{ bottom: -100, right: -100 }}
+            onError={(e) => {
+              console.log(e);
+            }}
+            onMapReady={(e) => {
+              console.log(e);
+            }}
+            toolbarEnabled={false}
             style={{ flex: 1, marginBottom: 10 }}
             initialRegion={{
               latitude: currentLocation.coords.latitude,
@@ -78,7 +143,36 @@ export default function WelcomeScreen({ navigation }) {
               longitudeDelta: 0.0421,
             }}
           >
+            {MarkerData.map((marker, index) => (
+              <Marker
+                onPress={(e) => {
+                  const { coordinate: LatLng, position: Point } = e.nativeEvent;
+                  console.log(LatLng, Point);
+                  console.log(
+                    e.currentTarget._internalFiberInstanceHandleDEV
+                      .memoizedProps.title
+                  );
+                  setMarker({
+                    coordinate: LatLng,
+                    title:
+                      e.currentTarget._internalFiberInstanceHandleDEV
+                        .memoizedProps.title,
+                    description:
+                      e.currentTarget._internalFiberInstanceHandleDEV
+                        .memoizedProps.description,
+                  });
+                }}
+                key={index}
+                coordinate={marker.position}
+                title={marker.intensity}
+                description={`Intensity: ${marker.intensity}, Number: ${marker.intensityNumber}`}
+              />
+            ))}
             <Marker
+              onPress={() => {
+                console.log("Ss");
+                setMarker(null);
+              }}
               coordinate={{
                 latitude: currentLocation.coords.latitude,
                 longitude: currentLocation.coords.longitude,
@@ -107,12 +201,17 @@ export default function WelcomeScreen({ navigation }) {
 
           {/* Custom Button 2 - Water Level */}
           <TouchableOpacity
-            style={[styles.button, styles.waterLevelButton]}
+            style={[
+              styles.button,
+              styles.waterLevelButton,
+              ...(!marker ? [styles.waterLevelButtonDisabled] : []),
+            ]}
+            disabled={marker === null}
             onPress={() => {
               navigation.navigate("AlertScreen", {
                 buttonText: "Water Level",
                 // buttonCB: () => {},
-                textResult: "Its has been raining this area since last morning",
+                textResult: provideText(marker.title),
               });
             }}
           >
@@ -193,5 +292,8 @@ const styles = StyleSheet.create({
   },
   waterLevelButton: {
     backgroundColor: "#1B5B97", // Custom color for water level button
+  },
+  waterLevelButtonDisabled: {
+    backgroundColor: "#86add1 !important",
   },
 });

@@ -14,10 +14,25 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "build": {
+      "production": {
+        "android": {
+          "buildType": "apk"
+        }
+      }
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "config": {
+        "googleMapsApiKey": "AIzaSyBENVA3jY1GVKqe_A5P6hLkXPUpC7KdH90"
+      }
     },
     "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBENVA3jY1GVKqe_A5P6hLkXPUpC7KdH90"
+        }
+      },
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION"
