@@ -14,7 +14,7 @@ import React, { useEffect, useState } from "react";
 // import MapView from "react-native-maps";
 import Header from "../../components/Header/Header";
 import { useSelector } from "react-redux";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location"; // Import expo-location
 
 export default function WelcomeScreen({ navigation }) {
@@ -127,6 +127,7 @@ export default function WelcomeScreen({ navigation }) {
         {/* Google Map View (Replace with actual GoogleMapView component) */}
         {currentLocation ? (
           <MapView
+            provider={PROVIDER_GOOGLE}
             legalLabelInsets={{ bottom: -100, right: -100 }}
             onError={(e) => {
               console.log(e);
