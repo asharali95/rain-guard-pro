@@ -16,6 +16,9 @@ import Header from "../../components/Header/Header";
 import { useSelector } from "react-redux";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location"; // Import expo-location
+import axios from "axios";
+import { createShimmerPlaceholder } from "react-native-shimmer-placeholder";
+import LinearGradient from "expo-linear-gradient";
 
 export default function WelcomeScreen({ navigation }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -23,6 +26,9 @@ export default function WelcomeScreen({ navigation }) {
   const [marker, setMarker] = useState(null);
   const auth = useSelector((state) => state.auth);
   const username = auth?.user?.displayName;
+  const [MarkerData, setMarkerData] = useState([]);
+  const [shimmerLoading, setShimmerLoading] = useState(true);
+  const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient);
 
   const provideText = (title) => {
     switch (title) {
@@ -30,55 +36,57 @@ export default function WelcomeScreen({ navigation }) {
         return "It's been light rain or no rain in this area.";
       case "Moderate Rain":
         return "It's been moderate rain in this area";
-      case "Heavy Rain":
+      case "High":
         return "It's been heaving raining in this area";
+      case "Empty":
+        return "No sign of rain in this area";
       default:
         return "It's been raining in this area";
     }
   };
-  const MarkerData = [
-    {
-      position: {
-        latitude: 24.871941,
-        longitude: 66.98806,
-      },
-      intensity: "Light Rain or No Rain",
-      intensityNumber: 949,
-    },
-    {
-      position: {
-        latitude: 24.931301,
-        longitude: 67.037323,
-      },
-      intensity: "Light Rain or No Rain",
-      intensityNumber: 951,
-    },
-    {
-      position: {
-        latitude: 24.93659,
-        longitude: 67.087533,
-      },
-      intensity: "Moderate Rain",
-      intensityNumber: 478,
-    },
-    {
-      position: {
-        latitude: 24.959242,
-        longitude: 67.074221,
-      },
-      intensity: "Heavy Rain!",
-      intensityNumber: 237,
-    },
-    {
-      position: {
-        latitude: 25.006272,
-        longitude: 67.064479,
-      },
-      intensity: "Moderate Rain",
-      intensityNumber: 264,
-    },
-    // Add more markers as needed
-  ];
+  // const MarkerData = [
+  //   {
+  //     position: {
+  //       latitude: 24.871941,
+  //       longitude: 66.98806,
+  //     },
+  //     intensity: "Light Rain or No Rain",
+  //     intensityNumber: 949,
+  //   },
+  //   {
+  //     position: {
+  //       latitude: 24.931301,
+  //       longitude: 67.037323,
+  //     },
+  //     intensity: "Light Rain or No Rain",
+  //     intensityNumber: 951,
+  //   },
+  //   {
+  //     position: {
+  //       latitude: 24.93659,
+  //       longitude: 67.087533,
+  //     },
+  //     intensity: "Moderate Rain",
+  //     intensityNumber: 478,
+  //   },
+  //   {
+  //     position: {
+  //       latitude: 24.959242,
+  //       longitude: 67.074221,
+  //     },
+  //     intensity: "Heavy Rain!",
+  //     intensityNumber: 237,
+  //   },
+  //   {
+  //     position: {
+  //       latitude: 25.006272,
+  //       longitude: 67.064479,
+  //     },
+  //     intensity: "Moderate Rain",
+  //     intensityNumber: 264,
+  //   },
+  //   // Add more markers as needed
+  // ];
   let drawerRef = null;
 
   // const openDrawer = () => {
@@ -99,11 +107,73 @@ export default function WelcomeScreen({ navigation }) {
     getLocationAsync();
   }, []);
 
+  useEffect(() => {
+    if (currentLocation) {
+      axios
+        .get(
+          "https://api.thingspeak.com/channels/2611773/feeds.json?api_key=I1EXR9VIVYOI2WUW"
+        )
+        .then((res) => {
+          // console.log(res);
+          let data = res.data.feeds;
+          finalData = data.map((d) => ({
+            ...d,
+            field1: parseFloat(d.field1),
+            field2: parseFloat(d.field2),
+          }));
+          setMarkerData([
+            ...finalData,
+            ...[
+              {
+                created_at: "2024-07-31T04:00:11.627Z",
+                entry_id: 1,
+                field1: 66.98806,
+                field2: 24.871941,
+                field3: "Light Rain or No Rain",
+                field4: "949",
+              },
+              {
+                created_at: "2024-07-31T04:00:11.627Z",
+                entry_id: 2,
+                field1: 67.037323,
+                field2: 24.931301,
+                field3: "Light Rain or No Rain",
+                field4: "951",
+              },
+              {
+                created_at: "2024-07-31T04:00:11.627Z",
+                entry_id: 3,
+                field1: 67.087533,
+                field2: 24.93659,
+                field3: "Moderate Rain",
+                field4: "478",
+              },
+              {
+                created_at: "2024-07-31T04:00:11.627Z",
+                entry_id: 4,
+                field1: 67.074221,
+                field2: 24.959242,
+                field3: "Heavy Rain!",
+                field4: "237",
+              },
+              {
+                created_at: "2024-07-31T04:00:11.627Z",
+                entry_id: 5,
+                field1: 67.064479,
+                field2: 25.006272,
+                field3: "Moderate Rain",
+                field4: "264",
+              },
+            ],
+          ]);
+        });
+    }
+  }, [currentLocation]);
+
   const getLocationAsync = async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        console.log("Location permission denied");
         return;
       }
 
@@ -127,14 +197,14 @@ export default function WelcomeScreen({ navigation }) {
         {/* Google Map View (Replace with actual GoogleMapView component) */}
         {currentLocation ? (
           <MapView
-            provider={PROVIDER_GOOGLE}
+            // provider={PROVIDER_GOOGLE}
             legalLabelInsets={{ bottom: -100, right: -100 }}
-            onError={(e) => {
-              console.log(e);
-            }}
-            onMapReady={(e) => {
-              console.log(e);
-            }}
+            // onError={(e) => {
+            //   console.log(e);
+            // }}
+            // onMapReady={(e) => {
+            //   console.log(e);
+            // }}
             toolbarEnabled={false}
             style={{ flex: 1, marginBottom: 10 }}
             initialRegion={{
@@ -149,29 +219,48 @@ export default function WelcomeScreen({ navigation }) {
                 onPress={(e) => {
                   const { coordinate: LatLng, position: Point } = e.nativeEvent;
                   console.log(LatLng, Point);
-                  console.log(
-                    e.currentTarget._internalFiberInstanceHandleDEV
-                      .memoizedProps.title
-                  );
-                  setMarker({
-                    coordinate: LatLng,
-                    title:
-                      e.currentTarget._internalFiberInstanceHandleDEV
-                        .memoizedProps.title,
-                    description:
-                      e.currentTarget._internalFiberInstanceHandleDEV
-                        .memoizedProps.description,
+                  const precision = 0.000001;
+                  // console.log(
+                  //   e.currentTarget._internalFiberInstanceHandleDEV
+                  //     .memoizedProps.title
+                  // );
+                  let marker = MarkerData.find((data) => {
+                    console.log(data.field2, data.field1);
+                    return (
+                      Math.abs(
+                        e.nativeEvent.coordinate.latitude - data.field2
+                      ) < precision &&
+                      Math.abs(
+                        e.nativeEvent.coordinate.longitude - data.field1
+                      ) < precision
+                      // data.field2 === e.nativeEvent.coordinate.latitude &&
+                      // data.field1 === e.nativeEvent.coordinate.longitude
+                    );
                   });
+                  console.log(marker);
+                  if (marker) {
+                    setMarker({
+                      coordinate: LatLng,
+                      title: marker.field3,
+                      description: `Water Level:${marker.field3}, Rain percent: ${marker.field4}`,
+                    });
+                  }
                 }}
                 key={index}
-                coordinate={marker.position}
-                title={marker.intensity}
-                description={`Intensity: ${marker.intensity}, Number: ${marker.intensityNumber}`}
+                coordinate={{
+                  latitude: marker.field2,
+                  longitude: marker.field1,
+                }}
+                title={
+                  marker.field3 === "Empty"
+                    ? "No rain here"
+                    : `Water Level:${marker.field3}`
+                }
+                description={`Intensity: ${marker.field3}, Rain percent: ${marker.field4}`}
               />
             ))}
             <Marker
               onPress={() => {
-                console.log("Ss");
                 setMarker(null);
               }}
               coordinate={{
@@ -181,6 +270,8 @@ export default function WelcomeScreen({ navigation }) {
               title="Your Location"
             />
           </MapView>
+        ) : shimmerLoading ? (
+          <ShimmerPlaceholder />
         ) : (
           <Text>Allow location permission to enable map view </Text>
         )}
