@@ -17,8 +17,9 @@ import { useSelector } from "react-redux";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location"; // Import expo-location
 import axios from "axios";
-import { createShimmerPlaceholder } from "react-native-shimmer-placeholder";
-import LinearGradient from "expo-linear-gradient";
+// import { createShimmerPlaceholder } from "react-native-shimmer-placeholder";
+// import LinearGradient from "expo-linear-gradient";
+import LoadingSpinner from "./LoadingSpinner";
 
 export default function WelcomeScreen({ navigation }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -28,7 +29,7 @@ export default function WelcomeScreen({ navigation }) {
   const username = auth?.user?.displayName;
   const [MarkerData, setMarkerData] = useState([]);
   const [shimmerLoading, setShimmerLoading] = useState(true);
-  const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient);
+  // const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient);
 
   const provideText = (title) => {
     switch (title) {
@@ -174,11 +175,13 @@ export default function WelcomeScreen({ navigation }) {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
+        setShimmerLoading(false)
         return;
       }
 
       let location = await Location.getCurrentPositionAsync({});
       setCurrentLocation(location);
+      setShimmerLoading(false)
     } catch (error) {
       console.error("Error getting location: ", error);
     }
@@ -197,7 +200,7 @@ export default function WelcomeScreen({ navigation }) {
         {/* Google Map View (Replace with actual GoogleMapView component) */}
         {currentLocation ? (
           <MapView
-            // provider={PROVIDER_GOOGLE}
+            provider={PROVIDER_GOOGLE}
             legalLabelInsets={{ bottom: -100, right: -100 }}
             // onError={(e) => {
             //   console.log(e);
@@ -271,7 +274,8 @@ export default function WelcomeScreen({ navigation }) {
             />
           </MapView>
         ) : shimmerLoading ? (
-          <ShimmerPlaceholder />
+          <LoadingSpinner/>
+          // <ShimmerPlaceholder />
         ) : (
           <Text>Allow location permission to enable map view </Text>
         )}
