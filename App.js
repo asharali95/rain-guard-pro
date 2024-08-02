@@ -1,6 +1,5 @@
-import "react-native-gesture-handler"
-import { AppRegistry } from 'react-native';
-import { StyleSheet,} from "react-native";
+import "react-native-gesture-handler";
+import { AppRegistry, StyleSheet } from "react-native";
 import { Provider } from "react-redux";
 import store from "./store";
 import SplashScreen from "./screens/splash/SplashScreen";
@@ -10,8 +9,44 @@ import AlertScreen from "./screens/home/AlertScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import * as BackgroundFetch from "expo-background-fetch";
+// import backgroundFetchTask from "./backgroundTasks"; // Import background tasks definition
+// import { useEffect } from "react";
+// import * as Notifications from 'expo-notifications';
+import Toast from "react-native-toast-message";
+
 export default function App() {
   const Stack = createStackNavigator();
+
+  // useEffect(() => {
+  //   registerBackgroundFetchAsync();
+  //   return () => {
+  //     // unregisterBackgroundFetchAsync();
+  //   };
+  // }, []);
+
+  // const registerBackgroundFetchAsync = async () => {
+  //   try {
+  //     await BackgroundFetch.registerTaskAsync(backgroundFetchTask, {
+  //       minimumInterval: 1,
+  //       stopOnTerminate: false,
+  //       startOnBoot: true,
+  //     });
+  //     console.log("Background fetch registered successfully");
+  //   } catch (error) {
+  //     console.error("Error registering background fetch:", error);
+  //   }
+  // };
+
+  // const unregisterBackgroundFetchAsync = async () => {
+  //   try {
+  //     await BackgroundFetch.unregisterTaskAsync(backgroundFetchTask);
+  //     console.log("Background fetch unregistered successfully");
+  //   } catch (error) {
+  //     console.error("Error unregistering background fetch:", error);
+  //   }
+  // };
+
   return (
     <Provider store={store}>
       <NavigationContainer>
@@ -38,27 +73,19 @@ export default function App() {
               options={{ headerShown: false }}
             />
           </Stack.Navigator>
+          <Toast />
         </SafeAreaProvider>
       </NavigationContainer>
-
-      {/* <SplashScreen /> */}
-      {/* <LoginScreen/> */}
-      {/* <WelcomeScreen/> */}
-      {/* <AlertScreen
-        buttonText={"Generate Result"}
-        textResult={"Its has been raining this area since last morning"}
-      /> */}
-      {/*  */}
-      {/* </View> */}
     </Provider>
   );
 }
 
+// Notifications.setNotificationHandler({
+//   handleNotification: async () => ({
+//     shouldShowAlert: true,
+//     shouldPlaySound: false,
+//     shouldSetBadge: false,
+//   }),
+// });
 const styles = StyleSheet.create({});
-AppRegistry.registerComponent('MyApp', () => App); // Register your app component
-
-// If using Hermes, wrap the app registration in the following block:
-// Hermes workaround for registering the app
-// https://github.com/facebook/react-native/issues/25675#issuecomment-657274378
-const appCreator = () => App;
-AppRegistry.registerComponent('MyApp', () => appCreator);
+AppRegistry.registerComponent("MyApp", () => App);

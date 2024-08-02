@@ -11,14 +11,13 @@ import {
   Platform,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-// import MapView from "react-native-maps";
 import Header from "../../components/Header/Header";
 import { useSelector } from "react-redux";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location"; // Import expo-location
 import axios from "axios";
-// import { createShimmerPlaceholder } from "react-native-shimmer-placeholder";
-// import LinearGradient from "expo-linear-gradient";
+import Toast from "react-native-toast-message"; // Import Toast
+
 import LoadingSpinner from "./LoadingSpinner";
 
 export default function WelcomeScreen({ navigation }) {
@@ -27,82 +26,73 @@ export default function WelcomeScreen({ navigation }) {
   const [marker, setMarker] = useState(null);
   const auth = useSelector((state) => state.auth);
   const username = auth?.user?.displayName;
-  const [MarkerData, setMarkerData] = useState([]);
+  const [MarkerData, setMarkerData] = useState([
+    {
+      created_at: "2024-07-31T04:00:11.627Z",
+      entry_id: null,
+      field1: 67.049987,
+      field2: 24.976652,
+      field3: "Medium",
+      field4: "60",
+    },
+    {
+      created_at: "2024-07-31T04:00:11.627Z",
+      entry_id: null,
+      field1: 66.98806,
+      field2: 24.871941,
+      field3: "Empty",
+      field4: "0",
+    },
+    {
+      created_at: "2024-07-31T04:00:11.627Z",
+      entry_id: null,
+      field1: 67.037323,
+      field2: 24.931301,
+      field3: "Empty",
+      field4: "0",
+    },
+    {
+      created_at: "2024-07-31T04:00:11.627Z",
+      entry_id: null,
+      field1: 67.087533,
+      field2: 24.93659,
+      field3: "Moderate",
+      field4: "40",
+    },
+    {
+      created_at: "2024-07-31T04:00:11.627Z",
+      entry_id: null,
+      field1: 67.074221,
+      field2: 24.959242,
+      field3: "Heavy",
+      field4: "95",
+    },
+    {
+      created_at: "2024-07-31T04:00:11.627Z",
+      entry_id: null,
+      field1: 67.064479,
+      field2: 25.006272,
+      field3: "Moderate",
+      field4: "45",
+    },
+  ]);
   const [shimmerLoading, setShimmerLoading] = useState(true);
-  // const ShimmerPlaceholder = createShimmerPlaceholder(LinearGradient);
-
+  const [lastId, setLastId] = useState(null);
   const provideText = (title) => {
+    console.log(title);
     switch (title) {
-      case "Light Rain or No Rain":
-        return "It's been light rain or no rain in this area.";
-      case "Moderate Rain":
-        return "It's been moderate rain in this area";
-      case "High":
-        return "It's been heaving raining in this area";
+      case "Medium":
+        return "It's been medium rainfall in this area.";
+      case "Moderate":
+        return "It's been moderate rainfall in this area";
+      case "Heavy":
+        return "It's been heavily raining in this area.";
       case "Empty":
         return "No sign of rain in this area";
       default:
-        return "It's been raining in this area";
+        return "No data to show";
     }
   };
-  // const MarkerData = [
-  //   {
-  //     position: {
-  //       latitude: 24.871941,
-  //       longitude: 66.98806,
-  //     },
-  //     intensity: "Light Rain or No Rain",
-  //     intensityNumber: 949,
-  //   },
-  //   {
-  //     position: {
-  //       latitude: 24.931301,
-  //       longitude: 67.037323,
-  //     },
-  //     intensity: "Light Rain or No Rain",
-  //     intensityNumber: 951,
-  //   },
-  //   {
-  //     position: {
-  //       latitude: 24.93659,
-  //       longitude: 67.087533,
-  //     },
-  //     intensity: "Moderate Rain",
-  //     intensityNumber: 478,
-  //   },
-  //   {
-  //     position: {
-  //       latitude: 24.959242,
-  //       longitude: 67.074221,
-  //     },
-  //     intensity: "Heavy Rain!",
-  //     intensityNumber: 237,
-  //   },
-  //   {
-  //     position: {
-  //       latitude: 25.006272,
-  //       longitude: 67.064479,
-  //     },
-  //     intensity: "Moderate Rain",
-  //     intensityNumber: 264,
-  //   },
-  //   // Add more markers as needed
-  // ];
-  let drawerRef = null;
-
-  // const openDrawer = () => {
-  //   if (drawerRef) {
-  //     drawerRef.openDrawer();
-  //     setIsDrawerOpen(true);
-  //   }
-  // };
-
-  // const closeDrawer = () => {
-  //   if (drawerRef) {
-  //     drawerRef.closeDrawer();
-  //     setIsDrawerOpen(false);
-  //   }
-  // };
 
   useEffect(() => {
     getLocationAsync();
@@ -110,82 +100,67 @@ export default function WelcomeScreen({ navigation }) {
 
   useEffect(() => {
     if (currentLocation) {
-      axios
-        .get(
-          "https://api.thingspeak.com/channels/2611773/feeds.json?api_key=I1EXR9VIVYOI2WUW"
-        )
-        .then((res) => {
-          // console.log(res);
-          let data = res.data.feeds;
-          finalData = data.map((d) => ({
-            ...d,
-            field1: parseFloat(d.field1),
-            field2: parseFloat(d.field2),
-          }));
-          setMarkerData([
-            ...finalData,
-            ...[
-              {
-                created_at: "2024-07-31T04:00:11.627Z",
-                entry_id: 1,
-                field1: 66.98806,
-                field2: 24.871941,
-                field3: "Light Rain or No Rain",
-                field4: "949",
-              },
-              {
-                created_at: "2024-07-31T04:00:11.627Z",
-                entry_id: 2,
-                field1: 67.037323,
-                field2: 24.931301,
-                field3: "Light Rain or No Rain",
-                field4: "951",
-              },
-              {
-                created_at: "2024-07-31T04:00:11.627Z",
-                entry_id: 3,
-                field1: 67.087533,
-                field2: 24.93659,
-                field3: "Moderate Rain",
-                field4: "478",
-              },
-              {
-                created_at: "2024-07-31T04:00:11.627Z",
-                entry_id: 4,
-                field1: 67.074221,
-                field2: 24.959242,
-                field3: "Heavy Rain!",
-                field4: "237",
-              },
-              {
-                created_at: "2024-07-31T04:00:11.627Z",
-                entry_id: 5,
-                field1: 67.064479,
-                field2: 25.006272,
-                field3: "Moderate Rain",
-                field4: "264",
-              },
-            ],
-          ]);
-        });
+      const interval = setInterval(() => {
+        axios
+          .get(
+            "https://api.thingspeak.com/channels/2611773/feeds.json?api_key=I1EXR9VIVYOI2WUW"
+          )
+          .then((res) => {
+            let data = res.data.feeds;
+            // console.log(res.data.feeds);
+            finalData = data.map((d) => ({
+              ...d,
+              field1: parseFloat(d.field1 ? d.field1 : 67.04692),
+              field2: parseFloat(d.field2 ? d.field2 : 24.97411),
+            }));
+            // console.log("finalData", MarkerData);
+            const uniqueEntries = finalData.filter((entry) => {
+              return !MarkerData.some(
+                (existing) => existing.entry_id === entry.entry_id
+              );
+            });
+            console.log("new Entry", uniqueEntries.length);
+            if (uniqueEntries.length) {
+
+              uniqueEntries.forEach((entry) => {
+                if (entry.field3 !== "Empty") {
+                  Toast.show({
+                    type: "success",
+                    text1: "New Alert",
+                    text2: `${entry.field3} Water level detected with rain intensity of ${entry.field4}%. Be awarex`,
+                  });
+                }
+              });
+
+              setMarkerData((prevMarkerData) => [
+                ...prevMarkerData,
+                ...uniqueEntries,
+              ]);
+              
+            }
+          });
+      }, 10000);
+
+      return () => clearInterval(interval);
     }
-  }, [currentLocation]);
+  }, [currentLocation, MarkerData]);
 
   const getLocationAsync = async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        setShimmerLoading(false)
+        setShimmerLoading(false);
         return;
       }
 
       let location = await Location.getCurrentPositionAsync({});
       setCurrentLocation(location);
-      setShimmerLoading(false)
+      setShimmerLoading(false);
     } catch (error) {
       console.error("Error getting location: ", error);
     }
   };
+
   return (
     <Header>
       <SafeAreaView style={styles.container}>
@@ -200,14 +175,8 @@ export default function WelcomeScreen({ navigation }) {
         {/* Google Map View (Replace with actual GoogleMapView component) */}
         {currentLocation ? (
           <MapView
-            provider={PROVIDER_GOOGLE}
+           provider={PROVIDER_GOOGLE}
             legalLabelInsets={{ bottom: -100, right: -100 }}
-            // onError={(e) => {
-            //   console.log(e);
-            // }}
-            // onMapReady={(e) => {
-            //   console.log(e);
-            // }}
             toolbarEnabled={false}
             style={{ flex: 1, marginBottom: 10 }}
             initialRegion={{
@@ -221,12 +190,7 @@ export default function WelcomeScreen({ navigation }) {
               <Marker
                 onPress={(e) => {
                   const { coordinate: LatLng, position: Point } = e.nativeEvent;
-                  console.log(LatLng, Point);
                   const precision = 0.000001;
-                  // console.log(
-                  //   e.currentTarget._internalFiberInstanceHandleDEV
-                  //     .memoizedProps.title
-                  // );
                   let marker = MarkerData.find((data) => {
                     console.log(data.field2, data.field1);
                     return (
@@ -236,8 +200,6 @@ export default function WelcomeScreen({ navigation }) {
                       Math.abs(
                         e.nativeEvent.coordinate.longitude - data.field1
                       ) < precision
-                      // data.field2 === e.nativeEvent.coordinate.latitude &&
-                      // data.field1 === e.nativeEvent.coordinate.longitude
                     );
                   });
                   console.log(marker);
@@ -259,7 +221,7 @@ export default function WelcomeScreen({ navigation }) {
                     ? "No rain here"
                     : `Water Level:${marker.field3}`
                 }
-                description={`Intensity: ${marker.field3}, Rain percent: ${marker.field4}`}
+                description={`Rain percent: ${marker.field4}%`}
               />
             ))}
             <Marker
@@ -270,32 +232,17 @@ export default function WelcomeScreen({ navigation }) {
                 latitude: currentLocation.coords.latitude,
                 longitude: currentLocation.coords.longitude,
               }}
+              pinColor="green"
               title="Your Location"
             />
           </MapView>
         ) : shimmerLoading ? (
-          <LoadingSpinner/>
-          // <ShimmerPlaceholder />
+          <LoadingSpinner />
         ) : (
           <Text>Allow location permission to enable map view </Text>
         )}
         {/* Action Buttons Section */}
         <View style={styles.buttonContainer}>
-          {/* Custom Button 1 - Generate Alert */}
-          <TouchableOpacity
-            style={[styles.button, styles.alertButton]}
-            onPress={() => {
-              navigation.navigate("AlertScreen", {
-                buttonText: "Raining Alert",
-                // buttonCB: () => {},
-                textResult: "Its has been raining this area since last morning",
-              });
-            }}
-          >
-            <Text style={styles.buttonText}>Generate Alert</Text>
-          </TouchableOpacity>
-
-          {/* Custom Button 2 - Water Level */}
           <TouchableOpacity
             style={[
               styles.button,
@@ -305,16 +252,23 @@ export default function WelcomeScreen({ navigation }) {
             disabled={marker === null}
             onPress={() => {
               navigation.navigate("AlertScreen", {
-                buttonText: "Water Level",
-                // buttonCB: () => {},
+                buttonText: "Go Back",
+                // onPress: () =>{
+                //   navigation.navigate("WelcomeScreen");
+                // },
                 textResult: provideText(marker.title),
               });
             }}
           >
-            <Text style={styles.buttonText}>Water Level</Text>
+            <Text style={styles.buttonText}>View Details</Text>
           </TouchableOpacity>
         </View>
+
+        {/* <Toast visibilityTime={5000} position="top" ref={(ref) => Toast.setRef(ref)} /> Add Toast component */}
       </SafeAreaView>
+      {/* <Text> */}
+
+      {/* </Text> */}
     </Header>
   );
 }
@@ -344,8 +298,8 @@ const styles = StyleSheet.create({
   },
   greetingContainer: {
     width: "100%",
-    flexDirection: "column",
-    // alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   greeting: {
     fontSize: 24,
@@ -356,7 +310,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderBottomWidth: 2,
     borderBottomColor: "#1B5B97",
-    // marginLeft: 10,
   },
   mapView: {
     flex: 1,
@@ -367,9 +320,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
   },
-
   button: {
     justifyContent: "center",
     alignItems: "center",
@@ -384,12 +336,12 @@ const styles = StyleSheet.create({
   },
   alertButton: {
     width: 200,
-    backgroundColor: "#1B5B97", // Custom color for alert button
+    backgroundColor: "#1B5B97",
   },
   waterLevelButton: {
-    backgroundColor: "#1B5B97", // Custom color for water level button
+    backgroundColor: "#1B5B97",
   },
   waterLevelButtonDisabled: {
-    backgroundColor: "#86add1 !important",
+    backgroundColor: "#86add1",
   },
 });

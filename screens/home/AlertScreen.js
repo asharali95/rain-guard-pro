@@ -5,14 +5,14 @@ import { useRoute } from "@react-navigation/native";
 
 export default function AlertScreen() {
   const route = useRoute();
-  const { buttonText, textResult } = route.params;
+  const { buttonText, textResult, onPress } = route.params;
   return (
     <Header>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button}>
+      {/* <View style={styles.buttonContainer}>
+        <TouchableOpacity onPress={onPress} style={styles.button}>
           <Text style={styles.buttonText}>{buttonText}</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
       <Text style={styles.paragraph}>{textResult}</Text>
     </Header>
   );
